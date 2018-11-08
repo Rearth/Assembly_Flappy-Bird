@@ -3,7 +3,7 @@ Flappy Bird on the MCU 8051 using an 8x8 led matrix and 2 buttons. Part of a Pro
 
 ## Intro
 
-```sh
+```
   ___ _                                             
  / __) |                                            
 | |__| | ____ ____  ____  _   _     ____  ___ ____  
