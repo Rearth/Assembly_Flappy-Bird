@@ -12,15 +12,6 @@ Flappy Bird on the MCU 8051 using an 8x8 led matrix and 2 buttons. Part of a Pro
 - Matrix Y:
     - P1 B0-7
 
-Example Table:
-|   |   | x |   |   |   |   | x |
-|   |   | x |   |   |   |   | x |
-|   |   | x |   |   | x |   |   |
-| x |   |   |   |   | x |   |   |
-|   |   |   |   |   | x |   |   |
-|   |   |   |   |   | x |   |   |
-|   |   |   |   |   | x |   |   |
-|   |   |   |   |   | x |   |   |
 
 In the first column is the bird, which can move up and down
 In the other columns are the "pillars" which move towards the bird
