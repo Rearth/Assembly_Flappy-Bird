@@ -15,3 +15,5 @@ Flappy Bird on the MCU 8051 using an 8x8 led matrix and 2 buttons. Part of a Pro
 
 In the first column is the bird, which can move up and down
 In the other columns are the "pillars" which move towards the bird
+
+[![N|Solid](https://github.com/Rearth/Assembly_Flappy-Bird/blob/master/doc/configuration_panel_taster.png)]
