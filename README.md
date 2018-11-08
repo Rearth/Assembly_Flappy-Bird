@@ -2,6 +2,7 @@
 Flappy Bird on the MCU 8051 using an 8x8 led matrix and 2 buttons. Part of a Project for the DHBW.
 
 ##Intro 1
+
 ##Pinout 1.1
 - Interrupt Ports:
     - 3.2
