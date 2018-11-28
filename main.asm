@@ -29,39 +29,58 @@ jmp main ; Springt zu main
 ; Einsprungpunkt für die Interrupt Servic Routine (ISR) (Hardware)
 org 003H
 	ljmp interrupt0 ; Springt zur interrupt0 Marke
-	
+
 
 org 013H
 	ljmp interrupt1 ; Springt zur interrupt0 Marke
-	RETI
+
 
 main:
 	setb EA 	; Aktiviert Interrupt System (Enable All)
+
 	setb EX0	; Aktiviert den External Interrupt 0 (Port 3.2)
-	setb IT0	; Internal Timer 0 aktivieren. EI0 reagiert somit auf die negativ Flanke
+	setb IT0	; Internal Timer 0 aktivieren. reagiert somit auf die negativ Flanke
+
+	setb EX1	; Aktiviert den External Interrupt 1 (Port 3.3)
+	setb IT1	; Internal Timer 1 aktivieren. reagiert somit auf die negativ Flanke
+
+	; Wandmuster initialisieren und im Registerspeicher ablegen
+	mov R0,#002H
+	mov @R0,#11001111b
+	inc R0
+	mov @R0,#11100111b
+	inc R0
+	mov @R0,#11110011b
+	inc R0
+	mov @R0,#11100111b
 
 
-	; Zu beginn das Bird setzen. ()linke Reihe mittig)
-	mov A,#01H
+	; Vogel Initialisieren
+	mov A,#008H
+	mov P2,A
+
+	; Panel für Wand initialisieren
+	mov A,#00000001b
 	mov P0,A
 
-	mov A,#08H
+	mov A,@R0
 	mov P1,A
 
+	; In Endlosschleife springen
 	jmp loop
 
 ; Endlosschleife
 loop:
-	nop
 	jmp loop
 
 ; ISR 1
 interrupt0:
 
-	; Hier irgandwas machen!!!!
-
-	mov A,#04H ; Das da ist irgendwas!
-	mov P0,A ; Das da ist irgendwas!
+	; Dividiert den Inhalt von P1 durch 2 und lädt ihn wieder in P1 (Punkt nach oben)
+	mov A,P2
+	mov B,#02H
+	div AB
+	mov P2,A
 
 	clr IE0	; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt und gelöscht (=0) nach Ausführung des Interrupts.
 
@@ -70,7 +89,15 @@ interrupt0:
 ; ISR 2
 interrupt1:
 
-	; Hier irgandwas machen!!!!
+	; Multipliziert den Inhalt von P1 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
+	mov A,P2
+	mov B,#02H
+	mul AB
+	mov P2,A
+
+	clr IE1	; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt und gelöscht (=0) nach Ausführung des Interrupts.
+
+	RETI
 
 
 
