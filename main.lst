@@ -1,13 +1,86 @@
 main                                                                                                                    PAGE 1
-                         1     ;content here
-****WARNING:Noinstructionfoundataddress0x00.ConsiderusageofappropriateORGdirectivetoclarifycorrectcodeplacement.
+                         1     ;  ___ _
+                         2     ; / __) |
+                         3     ;| |__| | ____ ____  ____  _   _     ____  ___ ____
+                         4     ;|  __) |/ _  |  _ \|  _ \| | | |   / _  |/___)    \
+                         5     ;| |  | ( ( | | | | | | | | |_| |  ( ( | |___ | | | |
+                         6     ;|_|  |_|\_||_| ||_/| ||_/ \__  |   \_||_(___/|_|_|_|
+                         7     ;             |_|   |_|   (____/
+                         8
+                         9     ; Autor:
+                        10     ; -> David Waidner
+                        11     ; -> Matthias Häfele
+                        12
+                        13     ; DHBW Karlsruhe
+                        14     ;
+                        15     ;Anleitungen:
+                        16     ;
+                        17     ; Zeitgeber/Zähler-Steuerregister (TCON):
+                        18     ; hhttp://www.self8051.de/zeitgeber_z%C3%A4hler-steuerregister_(tcon),18155.html
+                        19     ;
+                        20     ; Port 0 bis 3
+                        21     ; http://www.self8051.de/port_0_bis_3,18218.html
+                        22     ;
+                        23     ; Alle Befehle
+                        24     ; http://www.self8051.de/alle_Befehle_des_8051_Mikrocontroller,13290.html
+                        25     ;
+                        26     org 000H
+0000 020017             27     jmp main ; Springt zu main
+                        28
+                        29     ; Einsprungpunkt für die Interrupt Servic Routine (ISR) (Hardware)
+                        30     org 003H
+0003 02002B             31             ljmp interrupt0 ; Springt zur interrupt0 Marke
+                        32
+                        33
+                        34     org 013H
+0013 020032             35             ljmp interrupt1 ; Springt zur interrupt0 Marke
+0016 32                 36             RETI
+                        37
+                        38     main:
+0017 D2AF               39             setb EA         ; Aktiviert Interrupt System (Enable All)
+0019 D2A8               40             setb EX0        ; Aktiviert den External Interrupt 0 (Port 3.2)
+001B D288               41             setb IT0        ; Internal Timer 0 aktivieren. EI0 reagiert somit auf die negativ Flanke
+                        42
+                        43
+                        44             ; Zu beginn das Bird setzen auf die linke Reihe mittig
+001D 7401               45             mov A,#01H
+001F F580               46             mov P0,A
+                        47
+0021 7408               48             mov A,#08H
+0023 F590               49             mov P1,A
+                        50
+0025 020028             51             jmp loop
+                        52
+                        53     ; Endlosschleife
+                        54     loop:
+0028 00                 55             nop
+0029 80FD               56             jmp loop
+                        57
+                        58
+                        59     interrupt0:
+                        60
+                        61             ; Hier irgandwas machen!!!!
+                        62
+002B 7404               63             mov A,#04H ; Das da ist irgendwas!
+002D F580               64             mov P0,A ; Das da ist irgendwas!
+                        65
+002F C289               66             clr IE0 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
+                        67
+0031 32                 68             RETI
+                        69
+                        70     interrupt1:
+                        71
+                        72             ; Hier irgandwas machen!!!!
+                        73
+                        74
+                        75
+                        76
 ****WARNING:Missing`END'directive
-ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
+ASSEMBLY COMPLETE, NO ERRORS FOUND, 1 WARNING
 
 
 ERROR SUMMARY:
-Line 1, WARNING:Noinstructionfoundataddress0x00.ConsiderusageofappropriateORGdirectivetoclarifycorrectcodeplacement.
-Line 2, WARNING:Missing`END'directive
+Line 76, WARNING:Missing`END'directive
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -69,14 +142,14 @@ DP1H . . . . . . . . . . . . . . . .  D  ADDR  0085H  NOT USED
 DP1L . . . . . . . . . . . . . . . .  D  ADDR  0084H  NOT USED
 DPH. . . . . . . . . . . . . . . . .  D  ADDR  0083H  NOT USED
 DPL. . . . . . . . . . . . . . . . .  D  ADDR  0082H  NOT USED
-EA . . . . . . . . . . . . . . . . .  B  ADDR  00AFH  NOT USED
+EA . . . . . . . . . . . . . . . . .  B  ADDR  00AFH
 EC . . . . . . . . . . . . . . . . .  B  ADDR  00AEH  NOT USED
 EECON. . . . . . . . . . . . . . . .  D  ADDR  0096H  NOT USED
 ES . . . . . . . . . . . . . . . . .  B  ADDR  00ACH  NOT USED
 ET0. . . . . . . . . . . . . . . . .  B  ADDR  00A9H  NOT USED
 ET1. . . . . . . . . . . . . . . . .  B  ADDR  00ABH  NOT USED
 ET2. . . . . . . . . . . . . . . . .  B  ADDR  00ADH  NOT USED
-EX0. . . . . . . . . . . . . . . . .  B  ADDR  00A8H  NOT USED
+EX0. . . . . . . . . . . . . . . . .  B  ADDR  00A8H
 EX1. . . . . . . . . . . . . . . . .  B  ADDR  00AAH  NOT USED
 EXEN2. . . . . . . . . . . . . . . .  B  ADDR  00CBH  NOT USED
 EXF2 . . . . . . . . . . . . . . . .  B  ADDR  00CEH  NOT USED
@@ -85,26 +158,30 @@ EXTI1. . . . . . . . . . . . . . . .  C  ADDR  0013H  NOT USED
 F0 . . . . . . . . . . . . . . . . .  B  ADDR  00D5H  NOT USED
 FE . . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
 IE . . . . . . . . . . . . . . . . .  D  ADDR  00A8H  NOT USED
-IE0. . . . . . . . . . . . . . . . .  B  ADDR  0089H  NOT USED
+IE0. . . . . . . . . . . . . . . . .  B  ADDR  0089H
 IE1. . . . . . . . . . . . . . . . .  B  ADDR  008BH  NOT USED
 INT0 . . . . . . . . . . . . . . . .  B  ADDR  00B2H  NOT USED
 INT1 . . . . . . . . . . . . . . . .  B  ADDR  00B3H  NOT USED
+INTERRUPT0 . . . . . . . . . . . . .  C  ADDR  002BH
+INTERRUPT1 . . . . . . . . . . . . .  C  ADDR  0032H
 IP . . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
 IPH. . . . . . . . . . . . . . . . .  D  ADDR  00B7H  NOT USED
 IPH0 . . . . . . . . . . . . . . . .  D  ADDR  00B7H  NOT USED
 IPH1 . . . . . . . . . . . . . . . .  D  ADDR  00B3H  NOT USED
 IPL0 . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
 IPL1 . . . . . . . . . . . . . . . .  D  ADDR  00B2H  NOT USED
-IT0. . . . . . . . . . . . . . . . .  B  ADDR  0088H  NOT USED
+IT0. . . . . . . . . . . . . . . . .  B  ADDR  0088H
 IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
+LOOP . . . . . . . . . . . . . . . .  C  ADDR  0028H
+MAIN . . . . . . . . . . . . . . . .  C  ADDR  0017H
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
-P0 . . . . . . . . . . . . . . . . .  D  ADDR  0080H  NOT USED
-P1 . . . . . . . . . . . . . . . . .  D  ADDR  0090H  NOT USED
+P0 . . . . . . . . . . . . . . . . .  D  ADDR  0080H
+P1 . . . . . . . . . . . . . . . . .  D  ADDR  0090H
 P1M1 . . . . . . . . . . . . . . . .  D  ADDR  00D4H  NOT USED
 P1M2 . . . . . . . . . . . . . . . .  D  ADDR  00E2H  NOT USED
 P2 . . . . . . . . . . . . . . . . .  D  ADDR  00A0H  NOT USED
