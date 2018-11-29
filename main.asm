@@ -168,13 +168,13 @@ wandreset:
 ; Lässt Vogel fallen
 vogeldrop:
 	mov R2,#04H
-	
+
 	; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
 	mov A,P2
 	mov B,#02H
 	mul AB
 	mov P2,A
-	
+
 	jmp loop
 
 ; Matrix blinkt
