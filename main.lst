@@ -29,11 +29,11 @@ main                                                                            
                         28
                         29     ; Einsprungpunkt für die Interrupt Servic Routine (ISR) (Hardware)
                         30     org 003H
-0003 02003E             31             ljmp interrupt0 ; Springt zur interrupt0 Marke
+0003 02004D             31             ljmp interrupt0 ; Springt zur interrupt0 Marke
                         32
                         33
                         34     org 013H
-0013 020049             35             ljmp interrupt1 ; Springt zur interrupt0 Marke
+0013 020058             35             ljmp interrupt1 ; Springt zur interrupt0 Marke
                         36
                         37
                         38     main:
@@ -46,7 +46,7 @@ main                                                                            
 001E D28A               45             setb IT1        ; Internal Timer 1 aktivieren. reagiert somit auf die negativ Flanke
                         46
                         47             ; Wandmuster initialisieren und im Registerspeicher ablegen
-0020 7802               48             mov R0,#002H
+0020 780A               48             mov R0,#00AH
 0022 76CF               49             mov @R0,#11001111b
 0024 08                 50             inc R0
 0025 76E7               51             mov @R0,#11100111b
@@ -54,61 +54,149 @@ main                                                                            
 0028 76F3               53             mov @R0,#11110011b
 002A 08                 54             inc R0
 002B 76E7               55             mov @R0,#11100111b
-                        56
-                        57
-                        58             ; Vogel Initialisieren
-002D 7408               59             mov A,#008H
-002F F5A0               60             mov P2,A
+002D 08                 56             inc R0
+002E 76FC               57             mov @R0,#11111100b
+0030 08                 58             inc R0
+0031 76F3               59             mov @R0,#11110011b
+                        60
                         61
-                        62             ; Panel für Wand initialisieren
-0031 7401               63             mov A,#00000001b
-0033 F580               64             mov P0,A
-                        65
-0035 E6                 66             mov A,@R0
-0036 F590               67             mov P1,A
-                        68
-                        69             ; In Endlosschleife springen
-0038 02003B             70             jmp loop
-                        71
-                        72     ; Endlosschleife
-                        73     loop:
-003B 02003B             74             jmp loop
-                        75
-                        76     ; ISR 1
-                        77     interrupt0:
-                        78
-                        79             ; Dividiert den Inhalt von P1 durch 2 und lädt ihn wieder in P1 (Punkt nach oben)
-003E E5A0               80             mov A,P2
-0040 75F002             81             mov B,#02H
-0043 84                 82             div AB
-0044 F5A0               83             mov P2,A
+                        62             ; Vogel Initialisieren
+0033 7408               63             mov A,#008H
+0035 F5A0               64             mov P2,A
+0037 7A03               65             mov R2,#03H
+                        66
+                        67             ; Panel für Wand initialisieren
+0039 7401               68             mov A,#00000001b
+003B F580               69             mov P0,A
+                        70
+003D E6                 71             mov A,@R0
+003E F590               72             mov P1,A
+                        73
+                        74             ; In Endlosschleife springen
+0040 020043             75             jmp loop
+                        76
+                        77     ; Endlosschleife
+                        78     loop:
+                        79             ; Lässt den Vogel alle drei mal fallen
+0043 EA                 80             mov A,R2
+0044 14                 81             dec A
+0045 FA                 82             mov R2,A
+0046 604D               83             jz vogeldrop ; Vogel fällt
                         84
-0046 C289               85             clr IE0 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
+0048 790A               85             mov R1,#00AH ; Länge der Pause
                         86
-0048 32                 87             RETI
+004A 020063             87             jmp animationspause
                         88
-                        89     ; ISR 2
-                        90     interrupt1:
-                        91
-                        92             ; Multipliziert den Inhalt von P1 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
-0049 E5A0               93             mov A,P2
-004B 75F002             94             mov B,#02H
-004E A4                 95             mul AB
-004F F5A0               96             mov P2,A
-                        97
-0051 C28B               98             clr IE1 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
-                        99
-0053 32                100             RETI
-                       101
+                        89
+                        90     ; ISR 1
+                        91     interrupt0:
+                        92
+                        93             ; Dividiert den Inhalt von P2 durch 2 und lädt ihn wieder in P1 (Punkt nach oben)
+004D E5A0               94             mov A,P2
+004F 75F002             95             mov B,#02H
+0052 84                 96             div AB
+0053 F5A0               97             mov P2,A
+                        98
+0055 C289               99             clr IE0 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
+                       100
+0057 32                101             RETI
                        102
-                       103
-                       104
+                       103     ; ISR 2
+                       104     interrupt1:
+                       105
+                       106             ; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
+0058 E5A0              107             mov A,P2
+005A 75F002            108             mov B,#02H
+005D A4                109             mul AB
+005E F5A0              110             mov P2,A
+                       111
+0060 C28B              112             clr IE1 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
+                       113
+0062 32                114             RETI
+                       115
+                       116     animationspause:
+0063 D9FE              117             djnz R1,$
+0065 020068            118             jmp animation
+                       119
+                       120     ; Bewegt die Wand nach links
+                       121     animation:
+                       122             ; Wenn der Vogel weg ist
+0068 E5A0              123             mov A,P2
+006A 6035              124             jz gameover1
+                       125
+                       126             ; Multipliziere Port 2 mit 2. Bewegt die Wand nach links
+006C E580              127             mov A,P0
+006E 75F002            128             mov B,#02H
+0071 A4                129             mul AB
+0072 F580              130             mov P0,A
+0074 9480              131             subb A,#080H
+                       132
+0076 6002              133             jz neuewand
+                       134
+0078 80C9              135             jmp loop
+                       136
+                       137     ; Eine neue Wand aus dem Array
+                       138     neuewand:
+                       139             ; Kollisionserkennung
+007A E590              140             mov A,P1
+007C FB                141             mov R3,A
+007D E5A0              142             mov A,P2
+007F 5B                143             anl A,R3
+0080 701F              144             jnz gameover1
+                       145
+                       146             ; Wand zurück nach links schieben
+0082 7401              147             mov A,#00000001b
+0084 F580              148             mov P0,A
+                       149
+                       150
+                       151             ; Ein Wandmuster weiterschalten
+0086 18                152             dec R0
+0087 E6                153             mov A,@R0
+0088 F590              154             mov P1,A
+                       155
+                       156             ; Schauen ob das Array zu ende ist
+008A 740A              157             mov A,#0AH
+008C 98                158             subb A,R0
+008D 6002              159             jz wandreset
+                       160
+008F 80B2              161             jmp loop
+                       162
+                       163     ; Setzt das Wand Array auf die Startposition zurück
+                       164     wandreset:
+0091 780F              165             mov R0,#0FH
+0093 80AE              166             jmp loop
+                       167
+                       168     ; Lässt Vogel fallen
+                       169     vogeldrop:
+0095 7A04              170             mov R2,#04H
+                       171
+                       172             ; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
+0097 E5A0              173             mov A,P2
+0099 75F002            174             mov B,#02H
+009C A4                175             mul AB
+009D F5A0              176             mov P2,A
+                       177
+009F 80A2              178             jmp loop
+                       179
+                       180     ; Matrix blinkt
+                       181     gameover1:
+00A1 74FF              182             mov A,#0FFH
+00A3 F580              183             mov P0,A
+00A5 F590              184             mov P1,A
+00A7 0200AA            185             jmp gameover2
+                       186
+                       187     gameover2:
+00AA 7400              188             mov A,#000H
+00AC F580              189             mov P0,A
+00AE F590              190             mov P1,A
+00B0 80EF              191             jmp gameover1
+                       192
 ****WARNING:Missing`END'directive
 ASSEMBLY COMPLETE, NO ERRORS FOUND, 1 WARNING
 
 
 ERROR SUMMARY:
-Line 104, WARNING:Missing`END'directive
+Line 192, WARNING:Missing`END'directive
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -121,6 +209,8 @@ ADCLK. . . . . . . . . . . . . . . .  D  ADDR  00F2H  NOT USED
 ADCON. . . . . . . . . . . . . . . .  D  ADDR  00F3H  NOT USED
 ADDH . . . . . . . . . . . . . . . .  D  ADDR  00F5H  NOT USED
 ADDL . . . . . . . . . . . . . . . .  D  ADDR  00F4H  NOT USED
+ANIMATION. . . . . . . . . . . . . .  C  ADDR  0068H
+ANIMATIONSPAUSE. . . . . . . . . . .  C  ADDR  0063H
 AUXR . . . . . . . . . . . . . . . .  D  ADDR  008EH  NOT USED
 AUXR1. . . . . . . . . . . . . . . .  D  ADDR  00A2H  NOT USED
 B. . . . . . . . . . . . . . . . . .  D  ADDR  00F0H
@@ -185,13 +275,15 @@ EXTI0. . . . . . . . . . . . . . . .  C  ADDR  0003H  NOT USED
 EXTI1. . . . . . . . . . . . . . . .  C  ADDR  0013H  NOT USED
 F0 . . . . . . . . . . . . . . . . .  B  ADDR  00D5H  NOT USED
 FE . . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
+GAMEOVER1. . . . . . . . . . . . . .  C  ADDR  00A1H
+GAMEOVER2. . . . . . . . . . . . . .  C  ADDR  00AAH
 IE . . . . . . . . . . . . . . . . .  D  ADDR  00A8H  NOT USED
 IE0. . . . . . . . . . . . . . . . .  B  ADDR  0089H
 IE1. . . . . . . . . . . . . . . . .  B  ADDR  008BH
 INT0 . . . . . . . . . . . . . . . .  B  ADDR  00B2H  NOT USED
 INT1 . . . . . . . . . . . . . . . .  B  ADDR  00B3H  NOT USED
-INTERRUPT0 . . . . . . . . . . . . .  C  ADDR  003EH
-INTERRUPT1 . . . . . . . . . . . . .  C  ADDR  0049H
+INTERRUPT0 . . . . . . . . . . . . .  C  ADDR  004DH
+INTERRUPT1 . . . . . . . . . . . . .  C  ADDR  0058H
 IP . . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
 IPH. . . . . . . . . . . . . . . . .  D  ADDR  00B7H  NOT USED
 IPH0 . . . . . . . . . . . . . . . .  D  ADDR  00B7H  NOT USED
@@ -203,8 +295,9 @@ IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
-LOOP . . . . . . . . . . . . . . . .  C  ADDR  003BH
+LOOP . . . . . . . . . . . . . . . .  C  ADDR  0043H
 MAIN . . . . . . . . . . . . . . . .  C  ADDR  0016H
+NEUEWAND . . . . . . . . . . . . . .  C  ADDR  007AH
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
@@ -291,6 +384,8 @@ TR0. . . . . . . . . . . . . . . . .  B  ADDR  008CH  NOT USED
 TR1. . . . . . . . . . . . . . . . .  B  ADDR  008EH  NOT USED
 TR2. . . . . . . . . . . . . . . . .  B  ADDR  00CAH  NOT USED
 TXD. . . . . . . . . . . . . . . . .  B  ADDR  00B1H  NOT USED
+VOGELDROP. . . . . . . . . . . . . .  C  ADDR  0095H
+WANDRESET. . . . . . . . . . . . . .  C  ADDR  0091H
 WDTCON . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
 WDTPRG . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
 WDTRST . . . . . . . . . . . . . . .  D  ADDR  00A6H  NOT USED

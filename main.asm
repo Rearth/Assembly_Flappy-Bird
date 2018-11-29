@@ -45,7 +45,7 @@ main:
 	setb IT1	; Internal Timer 1 aktivieren. reagiert somit auf die negativ Flanke
 
 	; Wandmuster initialisieren und im Registerspeicher ablegen
-	mov R0,#002H
+	mov R0,#00AH
 	mov @R0,#11001111b
 	inc R0
 	mov @R0,#11100111b
@@ -53,11 +53,16 @@ main:
 	mov @R0,#11110011b
 	inc R0
 	mov @R0,#11100111b
+	inc R0
+	mov @R0,#11111100b
+	inc R0
+	mov @R0,#11110011b
 
 
 	; Vogel Initialisieren
 	mov A,#008H
 	mov P2,A
+	mov R2,#03H
 
 	; Panel für Wand initialisieren
 	mov A,#00000001b
@@ -71,12 +76,21 @@ main:
 
 ; Endlosschleife
 loop:
-	jmp loop
+	; Lässt den Vogel alle drei mal fallen
+	mov A,R2
+	dec A
+	mov R2,A
+	jz vogeldrop ; Vogel fällt
+
+	mov R1,#00AH ; Länge der Pause
+	
+	jmp animationspause
+
 
 ; ISR 1
 interrupt0:
 
-	; Dividiert den Inhalt von P1 durch 2 und lädt ihn wieder in P1 (Punkt nach oben)
+	; Dividiert den Inhalt von P2 durch 2 und lädt ihn wieder in P1 (Punkt nach oben)
 	mov A,P2
 	mov B,#02H
 	div AB
@@ -89,7 +103,7 @@ interrupt0:
 ; ISR 2
 interrupt1:
 
-	; Multipliziert den Inhalt von P1 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
+	; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
 	mov A,P2
 	mov B,#02H
 	mul AB
@@ -99,5 +113,79 @@ interrupt1:
 
 	RETI
 
+animationspause:
+	djnz R1,$
+	jmp animation
+
+; Bewegt die Wand nach links
+animation:
+	; Wenn der Vogel weg ist
+	mov A,P2
+	jz gameover1
+
+	; Multipliziere Port 2 mit 2. Bewegt die Wand nach links
+	mov A,P0
+	mov B,#02H
+	mul AB
+	mov P0,A
+	subb A,#080H
+
+	jz neuewand
+
+	jmp loop
+
+; Eine neue Wand aus dem Array
+neuewand:
+	; Kollisionserkennung
+	mov A,P1
+	mov R3,A
+	mov A,P2
+	anl A,R3
+	jnz gameover1
+
+	; Wand zurück nach links schieben
+	mov A,#00000001b
+	mov P0,A
 
 
+	; Ein Wandmuster weiterschalten
+	dec R0
+	mov A,@R0
+	mov P1,A
+
+	; Schauen ob das Array zu ende ist
+	mov A,#0AH
+	subb A,R0
+	jz wandreset
+
+	jmp loop
+
+; Setzt das Wand Array auf die Startposition zurück
+wandreset:
+	mov R0,#0FH
+	jmp loop
+
+; Lässt Vogel fallen
+vogeldrop:
+	mov R2,#04H
+	
+	; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
+	mov A,P2
+	mov B,#02H
+	mul AB
+	mov P2,A
+	
+	jmp loop
+
+; Matrix blinkt
+gameover1:
+	mov A,#0FFH
+	mov P0,A
+	mov P1,A
+	jmp gameover2
+
+gameover2:
+	mov A,#000H
+	mov P0,A
+	mov P1,A
+	jmp gameover1
