@@ -9,6 +9,7 @@
 ; Autor:
 ; -> David Waidner
 ; -> Matthias Häfele
+; -> Florian Schwarz
 
 ; DHBW Karlsruhe
 ;
@@ -62,12 +63,13 @@ main:
 	; Vogel Initialisieren
 	mov A,#008H
 	mov P2,A
-	mov R2,#03H
+	mov R2,#03H  ; Simuliert den Fall nach 3 Steps
 
-	; Panel für Wand initialisieren
+	; Panel für Wand initialisieren (X-Position)
 	mov A,#00000001b
 	mov P0,A
 
+	; Wandmuster auf den Port Setzen
 	mov A,@R0
 	mov P1,A
 
@@ -143,7 +145,7 @@ neuewand:
 	anl A,R3
 	jnz gameover1
 
-	; Wand zurück nach links schieben
+	; Wand zurück nach rechts schieben
 	mov A,#00000001b
 	mov P0,A
 
@@ -177,7 +179,7 @@ vogeldrop:
 
 	jmp loop
 
-; Matrix blinkt
+; Matrix blinken lassen
 gameover1:
 	mov A,#0FFH
 	mov P0,A

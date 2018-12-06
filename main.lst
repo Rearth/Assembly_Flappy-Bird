@@ -10,193 +10,195 @@ main                                                                            
                          9     ; Autor:
                         10     ; -> David Waidner
                         11     ; -> Matthias Häfele
-                        12
-                        13     ; DHBW Karlsruhe
-                        14     ;
-                        15     ;Anleitungen:
-                        16     ;
-                        17     ; Zeitgeber/Zähler-Steuerregister (TCON):
-                        18     ; hhttp://www.self8051.de/zeitgeber_z%C3%A4hler-steuerregister_(tcon),18155.html
-                        19     ;
-                        20     ; Port 0 bis 3
-                        21     ; http://www.self8051.de/port_0_bis_3,18218.html
-                        22     ;
-                        23     ; Alle Befehle
-                        24     ; http://www.self8051.de/alle_Befehle_des_8051_Mikrocontroller,13290.html
-                        25     ;
-                        26     org 000H
-0000 020016             27     jmp main ; Springt zu main
-                        28
-                        29     ; Einsprungpunkt für die Interrupt Servic Routine (ISR) (Hardware)
-                        30     org 003H
-0003 02004D             31             ljmp interrupt0 ; Springt zur interrupt0 Marke
-                        32
+                        12     ; -> Florian Schwarz
+                        13
+                        14     ; DHBW Karlsruhe
+                        15     ;
+                        16     ;Anleitungen:
+                        17     ;
+                        18     ; Zeitgeber/Zähler-Steuerregister (TCON):
+                        19     ; hhttp://www.self8051.de/zeitgeber_z%C3%A4hler-steuerregister_(tcon),18155.html
+                        20     ;
+                        21     ; Port 0 bis 3
+                        22     ; http://www.self8051.de/port_0_bis_3,18218.html
+                        23     ;
+                        24     ; Alle Befehle
+                        25     ; http://www.self8051.de/alle_Befehle_des_8051_Mikrocontroller,13290.html
+                        26     ;
+                        27     org 000H
+0000 020016             28     jmp main ; Springt zu main
+                        29
+                        30     ; Einsprungpunkt für die Interrupt Servic Routine (ISR) (Hardware)
+                        31     org 003H
+0003 02004D             32             ljmp interrupt0 ; Springt zur interrupt0 Marke
                         33
-                        34     org 013H
-0013 020058             35             ljmp interrupt1 ; Springt zur interrupt0 Marke
-                        36
+                        34
+                        35     org 013H
+0013 020058             36             ljmp interrupt1 ; Springt zur interrupt0 Marke
                         37
-                        38     main:
-0016 D2AF               39             setb EA         ; Aktiviert Interrupt System (Enable All)
-                        40
-0018 D2A8               41             setb EX0        ; Aktiviert den External Interrupt 0 (Port 3.2)
-001A D288               42             setb IT0        ; Internal Timer 0 aktivieren. reagiert somit auf die negativ Flanke
-                        43
-001C D2AA               44             setb EX1        ; Aktiviert den External Interrupt 1 (Port 3.3)
-001E D28A               45             setb IT1        ; Internal Timer 1 aktivieren. reagiert somit auf die negativ Flanke
-                        46
-                        47             ; Wandmuster initialisieren und im Registerspeicher ablegen
-0020 780A               48             mov R0,#00AH
-0022 76CF               49             mov @R0,#11001111b
-0024 08                 50             inc R0
-0025 76E7               51             mov @R0,#11100111b
-0027 08                 52             inc R0
-0028 76F3               53             mov @R0,#11110011b
-002A 08                 54             inc R0
-002B 76E7               55             mov @R0,#11100111b
-002D 08                 56             inc R0
-002E 76FC               57             mov @R0,#11111100b
-0030 08                 58             inc R0
-0031 76F3               59             mov @R0,#11110011b
-                        60
+                        38
+                        39     main:
+0016 D2AF               40             setb EA         ; Aktiviert Interrupt System (Enable All)
+                        41
+0018 D2A8               42             setb EX0        ; Aktiviert den External Interrupt 0 (Port 3.2)
+001A D288               43             setb IT0        ; Internal Timer 0 aktivieren. reagiert somit auf die negativ Flanke
+                        44
+001C D2AA               45             setb EX1        ; Aktiviert den External Interrupt 1 (Port 3.3)
+001E D28A               46             setb IT1        ; Internal Timer 1 aktivieren. reagiert somit auf die negativ Flanke
+                        47
+                        48             ; Wandmuster initialisieren und im Registerspeicher ablegen
+0020 780A               49             mov R0,#00AH
+0022 76CF               50             mov @R0,#11001111b
+0024 08                 51             inc R0
+0025 76E7               52             mov @R0,#11100111b
+0027 08                 53             inc R0
+0028 76F3               54             mov @R0,#11110011b
+002A 08                 55             inc R0
+002B 76E7               56             mov @R0,#11100111b
+002D 08                 57             inc R0
+002E 76FC               58             mov @R0,#11111100b
+0030 08                 59             inc R0
+0031 76F3               60             mov @R0,#11110011b
                         61
-                        62             ; Vogel Initialisieren
-0033 7408               63             mov A,#008H
-0035 F5A0               64             mov P2,A
-0037 7A03               65             mov R2,#03H
-                        66
-                        67             ; Panel für Wand initialisieren
-0039 7401               68             mov A,#00000001b
-003B F580               69             mov P0,A
-                        70
-003D E6                 71             mov A,@R0
-003E F590               72             mov P1,A
-                        73
-                        74             ; In Endlosschleife springen
-0040 020043             75             jmp loop
-                        76
-                        77     ; Endlosschleife
-                        78     loop:
-                        79             ; Lässt den Vogel alle drei mal fallen
-0043 EA                 80             mov A,R2
-0044 14                 81             dec A
-0045 FA                 82             mov R2,A
-0046 604D               83             jz vogeldrop ; Vogel fällt
-                        84
-0048 790A               85             mov R1,#00AH ; Länge der Pause
+                        62
+                        63             ; Vogel Initialisieren
+0033 7408               64             mov A,#008H
+0035 F5A0               65             mov P2,A
+0037 7A03               66             mov R2,#03H  ; Simuliert den Fall nach 3 Steps
+                        67
+                        68             ; Panel für Wand initialisieren (X-Position)
+0039 7401               69             mov A,#00000001b
+003B F580               70             mov P0,A
+                        71
+                        72             ; Wandmuster auf den Port Setzen
+003D E6                 73             mov A,@R0
+003E F590               74             mov P1,A
+                        75
+                        76             ; In Endlosschleife springen
+0040 020043             77             jmp loop
+                        78
+                        79     ; Endlosschleife
+                        80     loop:
+                        81             ; Lässt den Vogel alle drei mal fallen
+0043 EA                 82             mov A,R2
+0044 14                 83             dec A
+0045 FA                 84             mov R2,A
+0046 604D               85             jz vogeldrop ; Vogel fällt
                         86
-004A 020063             87             jmp animationspause
+0048 790A               87             mov R1,#00AH ; Länge der Pause
                         88
-                        89
-                        90     ; ISR 1
-                        91     interrupt0:
-                        92
-                        93             ; Dividiert den Inhalt von P2 durch 2 und lädt ihn wieder in P1 (Punkt nach oben)
-004D E5A0               94             mov A,P2
-004F 75F002             95             mov B,#02H
-0052 84                 96             div AB
-0053 F5A0               97             mov P2,A
-                        98
-0055 C289               99             clr IE0 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
+004A 020063             89             jmp animationspause
+                        90
+                        91
+                        92     ; ISR 1
+                        93     interrupt0:
+                        94
+                        95             ; Dividiert den Inhalt von P2 durch 2 und lädt ihn wieder in P1 (Punkt nach oben)
+004D E5A0               96             mov A,P2
+004F 75F002             97             mov B,#02H
+0052 84                 98             div AB
+0053 F5A0               99             mov P2,A
                        100
-0057 32                101             RETI
+0055 C289              101             clr IE0 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
                        102
-                       103     ; ISR 2
-                       104     interrupt1:
-                       105
-                       106             ; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
-0058 E5A0              107             mov A,P2
-005A 75F002            108             mov B,#02H
-005D A4                109             mul AB
-005E F5A0              110             mov P2,A
-                       111
-0060 C28B              112             clr IE1 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
+0057 32                103             RETI
+                       104
+                       105     ; ISR 2
+                       106     interrupt1:
+                       107
+                       108             ; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
+0058 E5A0              109             mov A,P2
+005A 75F002            110             mov B,#02H
+005D A4                111             mul AB
+005E F5A0              112             mov P2,A
                        113
-0062 32                114             RETI
+0060 C28B              114             clr IE1 ; Kennzeichnungsbit für externen Interrupt wird gesetzt (=1) bei bei einem Interrupt
                        115
-                       116     animationspause:
-0063 D9FE              117             djnz R1,$
-0065 020068            118             jmp animation
-                       119
-                       120     ; Bewegt die Wand nach links
-                       121     animation:
-                       122             ; Wenn der Vogel weg ist
-0068 E5A0              123             mov A,P2
-006A 6035              124             jz gameover1
-                       125
-                       126             ; Multipliziere Port 2 mit 2. Bewegt die Wand nach links
-006C E580              127             mov A,P0
-006E 75F002            128             mov B,#02H
-0071 A4                129             mul AB
-0072 F580              130             mov P0,A
-0074 9480              131             subb A,#080H
-                       132
-0076 6002              133             jz neuewand
+0062 32                116             RETI
+                       117
+                       118     animationspause:
+0063 D9FE              119             djnz R1,$
+0065 020068            120             jmp animation
+                       121
+                       122     ; Bewegt die Wand nach links
+                       123     animation:
+                       124             ; Wenn der Vogel weg ist
+0068 E5A0              125             mov A,P2
+006A 6035              126             jz gameover1
+                       127
+                       128             ; Multipliziere Port 2 mit 2. Bewegt die Wand nach links
+006C E580              129             mov A,P0
+006E 75F002            130             mov B,#02H
+0071 A4                131             mul AB
+0072 F580              132             mov P0,A
+0074 9480              133             subb A,#080H
                        134
-0078 80C9              135             jmp loop
+0076 6002              135             jz neuewand
                        136
-                       137     ; Eine neue Wand aus dem Array
-                       138     neuewand:
-                       139             ; Kollisionserkennung
-007A E590              140             mov A,P1
-007C FB                141             mov R3,A
-007D E5A0              142             mov A,P2
-007F 5B                143             anl A,R3
-0080 701F              144             jnz gameover1
-                       145
-                       146             ; Wand zurück nach links schieben
-0082 7401              147             mov A,#00000001b
-0084 F580              148             mov P0,A
-                       149
-                       150
-                       151             ; Ein Wandmuster weiterschalten
-0086 18                152             dec R0
-0087 E6                153             mov A,@R0
-0088 F590              154             mov P1,A
-                       155
-                       156             ; Schauen ob das Array zu ende ist
-008A 740A              157             mov A,#0AH
-008C 98                158             subb A,R0
-008D 6002              159             jz wandreset
-                       160
-008F 80B2              161             jmp loop
+0078 80C9              137             jmp loop
+                       138
+                       139     ; Eine neue Wand aus dem Array
+                       140     neuewand:
+                       141             ; Kollisionserkennung
+007A E590              142             mov A,P1
+007C FB                143             mov R3,A
+007D E5A0              144             mov A,P2
+007F 5B                145             anl A,R3
+0080 701F              146             jnz gameover1
+                       147
+                       148             ; Wand zurück nach rechts schieben
+0082 7401              149             mov A,#00000001b
+0084 F580              150             mov P0,A
+                       151
+                       152
+                       153             ; Ein Wandmuster weiterschalten
+0086 18                154             dec R0
+0087 E6                155             mov A,@R0
+0088 F590              156             mov P1,A
+                       157
+                       158             ; Schauen ob das Array zu ende ist
+008A 740A              159             mov A,#0AH
+008C 98                160             subb A,R0
+008D 6002              161             jz wandreset
                        162
-                       163     ; Setzt das Wand Array auf die Startposition zurück
-                       164     wandreset:
-0091 780F              165             mov R0,#0FH
-0093 80AE              166             jmp loop
-                       167
-                       168     ; Lässt Vogel fallen
-                       169     vogeldrop:
-0095 7A04              170             mov R2,#04H
-                       171
-                       172             ; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
-0097 E5A0              173             mov A,P2
-0099 75F002            174             mov B,#02H
-009C A4                175             mul AB
-009D F5A0              176             mov P2,A
-                       177
-009F 80A2              178             jmp loop
+008F 80B2              163             jmp loop
+                       164
+                       165     ; Setzt das Wand Array auf die Startposition zurück
+                       166     wandreset:
+0091 780F              167             mov R0,#0FH
+0093 80AE              168             jmp loop
+                       169
+                       170     ; Lässt Vogel fallen
+                       171     vogeldrop:
+0095 7A04              172             mov R2,#04H
+                       173
+                       174             ; Multipliziert den Inhalt von P2 mit 2 und lädt ihn wieder in P1 (Punkt nach unten)
+0097 E5A0              175             mov A,P2
+0099 75F002            176             mov B,#02H
+009C A4                177             mul AB
+009D F5A0              178             mov P2,A
                        179
-                       180     ; Matrix blinkt
-                       181     gameover1:
-00A1 74FF              182             mov A,#0FFH
-00A3 F580              183             mov P0,A
-00A5 F590              184             mov P1,A
-00A7 0200AA            185             jmp gameover2
-                       186
-                       187     gameover2:
-00AA 7400              188             mov A,#000H
-00AC F580              189             mov P0,A
-00AE F590              190             mov P1,A
-00B0 80EF              191             jmp gameover1
-                       192
+009F 80A2              180             jmp loop
+                       181
+                       182     ; Matrix blinken lassen
+                       183     gameover1:
+00A1 74FF              184             mov A,#0FFH
+00A3 F580              185             mov P0,A
+00A5 F590              186             mov P1,A
+00A7 0200AA            187             jmp gameover2
+                       188
+                       189     gameover2:
+00AA 7400              190             mov A,#000H
+00AC F580              191             mov P0,A
+00AE F590              192             mov P1,A
+00B0 80EF              193             jmp gameover1
+                       194
 ****WARNING:Missing`END'directive
 ASSEMBLY COMPLETE, NO ERRORS FOUND, 1 WARNING
 
 
 ERROR SUMMARY:
-Line 192, WARNING:Missing`END'directive
+Line 194, WARNING:Missing`END'directive
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
